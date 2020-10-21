@@ -99,6 +99,14 @@ a.navbar-brand {
     margin-top: 3%;
 }
 
+.contact, .about {
+    color: #ffffff;
+}
+
+.title {
+    padding-left: 0;   
+}
+
 @media (max-width: 1100px) {
     .navbar-collapse-shrink {
         width: 100%;
