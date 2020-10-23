@@ -1,28 +1,33 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
+const mongoose = require("mongoose");
+const app = express();
 
 const postOne = "Choose a stack and then, Practice! Practice! Practice!.";
-const aboutContent = "Hac habitasse platea dictumst vestibulum rhoncus est pellentesque. Dictumst vestibulum rhoncus est pellentesque elit ullamcorper. Non diam phasellus vestibulum lorem sed. Platea dictumst quisque sagittis purus sit. Egestas sed sed risus pretium quam vulputate dignissim suspendisse. Mauris in aliquam sem fringilla. Semper risus in hendrerit gravida rutrum quisque non tellus orci. Amet massa vitae tortor condimentum lacinia quis vel eros. Enim ut tellus elementum sagittis vitae. Mauris ultrices eros in cursus turpis massa tincidunt dui.";
-const contactContent = "Scelerisque eleifend donec pretium vulputate sapien. Rhoncus urna neque viverra justo nec ultrices. Arcu dui vivamus arcu felis bibendum. Consectetur adipiscing elit duis tristique. Risus viverra adipiscing at in tellus integer feugiat. Sapien nec sagittis aliquam malesuada bibendum arcu vitae. Consequat interdum varius sit amet mattis. Iaculis nunc sed augue lacus. Interdum posuere lorem ipsum dolor sit amet consectetur adipiscing elit. Pulvinar elementum integer enim neque. Ultrices gravida dictum fusce ut placerat orci nulla. Mauris in aliquam sem fringilla ut morbi tincidunt. Tortor posuere ac ut consequat semper viverra nam libero.";
+const aboutContent = "Hi, I am Sinni Singla. I have 3+ years of experience in the industry and high level proﬁciency in HTML, CSS, Angular, React Js, JQuery, expertise with C#, Node JS and more. I have developed web applications across multiple APIs and third-party integrations. I have worked on many applications either the requirment is to add a new feature to an existing application or build a new website from the ground up. I have worked in a team as well as independently.";
 
-const app = express();
-const postList = [{postid: 1, title: "How to become a full-stack developer?", post: postOne}];
 app.set('view engine', 'ejs');
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static("public"));
 
+
+// Database Connection and Model Definition
+const url = "mongodb://localhost:27017/mybucketlist";
+mongoose.connect(url, {useNewUrlParser: true, useUnifiedTopology: true});
+const postSchema = {
+                    title: String,
+                    post: String
+                }
+const Post = mongoose.model("post", postSchema);
+
+//Create dummy data
+
 app.get("/", function(req, res) {
-    res.render("home", {postList: postList});
-});
-
-app.get("/about", function(req, res) {
-    res.render("about", {aboutContent: aboutContent});
-});
-
-app.get("/contact", function(req, res) {
-    res.render("contact", {contactContent: contactContent});
+    Post.find({}, function(err, posts) {
+        res.render("home", {postList: posts});
+    })
 });
 
 app.get("/compose", function(req, res) {
@@ -30,28 +35,29 @@ app.get("/compose", function(req, res) {
 });
 
 app.post("/compose", function(req, res) {
-    const id = postList.length + 1;
-    const blogPost = {
+    const blogPost =new  Post({
         title: req.body.title,
-        post: req.body.post,
-        postid: id
-    }
-    postList.push(blogPost);
+        post: req.body.post
+    });
+    blogPost.save();
     res.redirect("/");
 });
 
 app.get("/posts/:postid", function(req, res) {
     const postId = req.params.postid;
     let postCurrent = {};
-    postList.forEach(function(post) {
-        if(post.postid == postId) {
-            postCurrent = post;
-        }
+    Post.findOne({_id: postId}, function(err, post) {
+        res.render("post",  {post: post});
     });
-    res.render("post",  {post: postCurrent});
 });
 
+app.get("/about", function(req, res) {
+    res.render("about", {aboutContent: aboutContent});
+});
 
+app.get("/contact", function(req, res) {
+    res.render("contact");
+});
 
 
 
