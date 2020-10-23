@@ -28,7 +28,12 @@ const Post = mongoose.model("post", postSchema);
 
 app.get("/", function(req, res) {
     Post.find({}, function(err, posts) {
-        res.render("home", {postList: posts});
+        if(posts == null) {
+            res.render("home", {postList: []});
+        } else {
+            res.render("home", {postList: posts});
+        }
+
     })
 });
 
